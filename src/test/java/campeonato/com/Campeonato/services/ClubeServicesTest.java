@@ -180,7 +180,7 @@ public class ClubeServicesTest {
     @Test
     void listarClubesFiltroUF() {
         criarSalvarClube("Corinthians", "SP", LocalDate.of(1910, 9, 1), true);
-        criarSalvarClube("Palmeiras", "RJ", LocalDate.of(1914, 8, 26), false);
+        criarSalvarClube("Flamengo", "RJ", LocalDate.of(1914, 8, 26), false);
 
         Page<Clube> pageSP = clubeService.listarClubes(null, "SP", null, PageRequest.of(0, 10));
         assertEquals(1, pageSP.getTotalElements());
@@ -188,7 +188,7 @@ public class ClubeServicesTest {
 
         Page<Clube> pageRJ = clubeService.listarClubes(null, "RJ", null, PageRequest.of(0, 10));
         assertEquals(1, pageRJ.getTotalElements());
-        assertEquals("Palmeiras", pageRJ.getContent().get(0).getNome());
+        assertEquals("Flamengo", pageRJ.getContent().get(0).getNome());
     }
 
     @Test
