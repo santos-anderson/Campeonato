@@ -47,9 +47,10 @@ public class ClubeService {
         clubeRepository.findByNomeAndUfIgnoreCase(dto.getNome(), dto.getUf())
                 .filter(outroClube -> !outroClube.getId().equals(id))
                 .ifPresent(outroClube -> {
-                    throw new ClubeExisteException("Já existe um clube com esse nome nesse estado.");
+                    throw new ClubeExisteException(
+                            "Já existe um clube chamado '" + dto.getNome() + "' no estado '" + dto.getUf() + "'."
+                    );
                 });
-
         clube.setNome(dto.getNome());
         clube.setUf(dto.getUf());
         clube.setDataCriacao(dto.getDataCriacao());

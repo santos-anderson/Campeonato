@@ -57,7 +57,7 @@ public class ClubeController {
     public ResponseEntity<String> inativarClube(@PathVariable Long id) {
         try {
             clubeService.inativarClube(id);
-            return ResponseEntity.noContent().build(); // 204, sem body
+            return ResponseEntity.noContent().build();
         } catch (ClubeNaoEncontradoException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
         }
