@@ -164,16 +164,19 @@ public class EstadioServiceTest {
         assertEquals(0, page.getTotalElements());
         assertTrue(page.getContent().isEmpty());
     }
-
     @Test
     void listarEstadioPaginacao() {
-        for (int i = 1; i <= 3; i++) {
-            criarSalvarEstadio("Estadio" + i);
-        }
+        criarSalvarEstadio("Morumbi");
+        criarSalvarEstadio("Allianz Parque");
+        criarSalvarEstadio("Maracanã");
+
         Page<Estadio> page1 = estadioService.listarEstadio(null, PageRequest.of(0, 2));
         assertEquals(2, page1.getContent().size());
+
         Page<Estadio> page2 = estadioService.listarEstadio(null, PageRequest.of(1, 2));
         assertEquals(1, page2.getContent().size());
+
         assertEquals(3, page1.getTotalElements());
     }
+
 }
