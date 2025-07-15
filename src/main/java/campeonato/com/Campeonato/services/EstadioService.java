@@ -42,8 +42,8 @@ public class EstadioService {
         estadioRepository.findByNomeIgnoreCase(dto.getNome())
                 .filter(outroEstadio -> !outroEstadio.getId().equals(id))
                 .ifPresent(outroEstadio -> {
-                    throw new EstadioExisteException("Já existe um estádio com esse nome!");
-                });
+                   throw new EstadioExisteException("Já existe um estádio com esse nome!");
+              });
 
         estadio.setNome(dto.getNome());
 
@@ -53,7 +53,7 @@ public class EstadioService {
 
     public Estadio buscarEstadioPorId(Long id) {
         return estadioRepository.findById(id).orElseThrow(() ->
-                new EstadioNaoEncontradoException("Estadio não encontrado!"));
+                new EstadioNaoEncontradoException("Estádio não encontrado!"));
     }
 
 
