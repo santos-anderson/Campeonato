@@ -10,7 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -132,6 +133,47 @@ public class EstadioServiceTest {
         EstadioNaoEncontradoException ex = assertThrows(EstadioNaoEncontradoException.class, () ->
                 estadioService.buscarEstadioPorId(99L)
         );
-        assertEquals("Estadio não encontrado!", ex.getMessage());
+        assertEquals("Estádio não encontrado!", ex.getMessage());
+    }
+
+    @Test
+    void listarEstadioSemFiltro() {
+        criarSalvarEstadio("Morumbi");
+        criarSalvarEstadio("Allianz Parque");
+        Page<Estadio> page = estadioService.listarEstadio(null, PageRequest.of(0, 10));
+        assertEquals(2, page.getTotalElements());
+    }
+
+    @Test
+    void listarEstadioFiltroNome() {
+        criarSalvarEstadio("Morumbi");
+        criarSalvarEstadio("Allianz Parque");
+        Page<Estadio> page = estadioService.listarEstadio("mor", PageRequest.of(0, 10));
+        assertEquals(1, page.getTotalElements());
+        assertEquals("Morumbi", page.getContent().get(0).getNome());
+
+        page = estadioService.listarEstadio("allianz", PageRequest.of(0, 10));
+        assertEquals(1, page.getTotalElements());
+        assertEquals("Allianz Parque", page.getContent().get(0).getNome());
+    }
+
+    @Test
+    void listarEstadioVazioQuandoNaoEncontra() {
+        criarSalvarEstadio("Morumbi");
+        Page<Estadio> page = estadioService.listarEstadio("maracana", PageRequest.of(0, 10));
+        assertEquals(0, page.getTotalElements());
+        assertTrue(page.getContent().isEmpty());
+    }
+
+    @Test
+    void listarEstadioPaginacao() {
+        for (int i = 1; i <= 3; i++) {
+            criarSalvarEstadio("Estadio" + i);
+        }
+        Page<Estadio> page1 = estadioService.listarEstadio(null, PageRequest.of(0, 2));
+        assertEquals(2, page1.getContent().size());
+        Page<Estadio> page2 = estadioService.listarEstadio(null, PageRequest.of(1, 2));
+        assertEquals(1, page2.getContent().size());
+        assertEquals(3, page1.getTotalElements());
     }
 }
