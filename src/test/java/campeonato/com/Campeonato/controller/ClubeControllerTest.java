@@ -118,7 +118,8 @@ public class ClubeControllerTest {
     @Test
     void atualizarClubeDuplicado() throws Exception {
         criarSalvarClube("Corinthians", "SP", LocalDate.of(1910, 9, 1), true);
-        Clube clube2 = criarSalvarClube("Palmeiras", "SP", LocalDate.of(1914,8,26), true); // alvo do update
+        Clube clube2 = criarSalvarClube("Palmeiras", "SP",
+                LocalDate.of(1914,8,26), true);
 
         String json = """
             {
