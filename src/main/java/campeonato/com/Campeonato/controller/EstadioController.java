@@ -48,7 +48,7 @@ public class EstadioController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> buscarClubePorId(@PathVariable Long id) {
+    public ResponseEntity<?> buscarEstadioPorId(@PathVariable Long id) {
         try {
             Estadio estadio = estadioService.buscarEstadioPorId(id);
             return ResponseEntity.ok(estadio);

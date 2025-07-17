@@ -8,6 +8,7 @@ import campeonato.com.Campeonato.exception.PartidaCadastroException;
 import campeonato.com.Campeonato.exception.PartidaValidacaoException;
 import campeonato.com.Campeonato.model.Partida;
 import campeonato.com.Campeonato.services.PartidaService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +30,7 @@ public class PartidaController {
     private PartidaService partidaService;
 
     @PostMapping
-    public ResponseEntity<String> cadastrarPartida(@RequestBody PartidaRequestDTO dto) {
+    public ResponseEntity<String> cadastrarPartida(@RequestBody @Valid PartidaRequestDTO dto) {
         try {
             String msg = partidaService.cadastrarPartida(dto);
             return ResponseEntity.status(HttpStatus.CREATED).body(msg);

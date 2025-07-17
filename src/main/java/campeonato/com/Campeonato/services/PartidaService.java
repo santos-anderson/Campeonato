@@ -32,23 +32,23 @@ public class PartidaService {
     @Autowired
     private EstadioRepository estadioRepository;
 
-    public String cadastrarPartida(PartidaRequestDTO dto) {
+    public String cadastrarPartida(PartidaRequestDTO partidaRequestDTO) {
 
-        if (dto.getClubeCasaId() == null || dto.getClubeVisitanteId() == null ||
-                dto.getEstadioId() == null || dto.getDataHora() == null ||
-                dto.getGolsCasa() == null || dto.getGolsVisitante() == null) {
+        if (partidaRequestDTO.getClubeCasaId() == null || partidaRequestDTO.getClubeVisitanteId() == null ||
+                partidaRequestDTO.getEstadioId() == null || partidaRequestDTO.getDataHora() == null ||
+                partidaRequestDTO.getGolsCasa() == null || partidaRequestDTO.getGolsVisitante() == null) {
             throw new PartidaValidacaoException("Todos os campos são obrigatórios.");
         }
-        if (dto.getClubeCasaId().equals(dto.getClubeVisitanteId())) {
+        if (partidaRequestDTO.getClubeCasaId().equals(partidaRequestDTO.getClubeVisitanteId())) {
             throw new PartidaValidacaoException("Clubes não podem ser iguais!");
         }
-        if (dto.getGolsCasa() < 0 || dto.getGolsVisitante() < 0) {
+        if (partidaRequestDTO.getGolsCasa() < 0 || partidaRequestDTO.getGolsVisitante() < 0) {
             throw new PartidaValidacaoException("Gols não podem ser negativos!");
         }
 
-        Clube casa = clubeRepository.findById(dto.getClubeCasaId()).orElse(null);
-        Clube visitante = clubeRepository.findById(dto.getClubeVisitanteId()).orElse(null);
-        Estadio estadio = estadioRepository.findById(dto.getEstadioId()).orElse(null);
+        Clube casa = clubeRepository.findById(partidaRequestDTO.getClubeCasaId()).orElse(null);
+        Clube visitante = clubeRepository.findById(partidaRequestDTO.getClubeVisitanteId()).orElse(null);
+        Estadio estadio = estadioRepository.findById(partidaRequestDTO.getEstadioId()).orElse(null);
 
         if (casa == null)
             throw new PartidaValidacaoException("Clube da casa não existe!");
@@ -63,13 +63,13 @@ public class PartidaService {
         if (!Boolean.TRUE.equals(visitante.getStatus()))
             throw new PartidaCadastroException("Clube visitante está inativo.");
 
-        if (dto.getDataHora().toLocalDate().isBefore(casa.getDataCriacao()) ||
-                dto.getDataHora().toLocalDate().isBefore(visitante.getDataCriacao()))
+        if (partidaRequestDTO.getDataHora().toLocalDate().isBefore(casa.getDataCriacao()) ||
+                partidaRequestDTO.getDataHora().toLocalDate().isBefore(visitante.getDataCriacao()))
             throw new PartidaCadastroException("Data da partida não pode ser anterior à data de criação de algum clube.");
 
 
-        LocalDateTime inicio = dto.getDataHora().minusHours(48);
-        LocalDateTime fim = dto.getDataHora().plusHours(48);
+        LocalDateTime inicio = partidaRequestDTO.getDataHora().minusHours(48);
+        LocalDateTime fim = partidaRequestDTO.getDataHora().plusHours(48);
         if (partidaRepository.existsByClubeCasaIdAndDataHoraBetween(casa.getId(), inicio, fim) ||
                 partidaRepository.existsByClubeVisitanteIdAndDataHoraBetween(casa.getId(), inicio, fim) ||
                 partidaRepository.existsByClubeCasaIdAndDataHoraBetween(visitante.getId(), inicio, fim) ||
@@ -78,8 +78,8 @@ public class PartidaService {
         }
 
 
-        LocalDateTime diaIni = dto.getDataHora().toLocalDate().atStartOfDay();
-        LocalDateTime diaFim = dto.getDataHora().toLocalDate().atTime(23, 59, 59);
+        LocalDateTime diaIni = partidaRequestDTO.getDataHora().toLocalDate().atStartOfDay();
+        LocalDateTime diaFim = partidaRequestDTO.getDataHora().toLocalDate().atTime(23, 59, 59);
         if (partidaRepository.existsByEstadioIdAndDataHoraBetween(estadio.getId(), diaIni, diaFim))
             throw new PartidaCadastroException("Já existe partida nesse estádio nesse dia!");
 
@@ -88,9 +88,9 @@ public class PartidaService {
         partida.setClubeCasa(casa);
         partida.setClubeVisitante(visitante);
         partida.setEstadio(estadio);
-        partida.setDataHora(dto.getDataHora());
-        partida.setGolsCasa(dto.getGolsCasa());
-        partida.setGolsVisitante(dto.getGolsVisitante());
+        partida.setDataHora(partidaRequestDTO.getDataHora());
+        partida.setGolsCasa(partidaRequestDTO.getGolsCasa());
+        partida.setGolsVisitante(partidaRequestDTO.getGolsVisitante());
 
         partidaRepository.save(partida);
         return "Partida cadastrada!";
