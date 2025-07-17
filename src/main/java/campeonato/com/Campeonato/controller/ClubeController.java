@@ -82,6 +82,7 @@ public class ClubeController {
     ) {
         return clubeService.listarClubes(nome, uf, status, pageable);
     }
+
 }
 
 
