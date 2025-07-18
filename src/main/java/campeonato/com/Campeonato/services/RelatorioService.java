@@ -9,11 +9,16 @@ import campeonato.com.Campeonato.model.Partida;
 import campeonato.com.Campeonato.repository.ClubeRepository;
 import campeonato.com.Campeonato.repository.PartidaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import java.util.*;
+
 
 
 @Service
@@ -196,5 +201,96 @@ public class RelatorioService {
         };
         ranking.sort(comparator);
         return ranking;
+    }
+
+    public Page<Partida> partidasGoleada(Long clubeId, Long estadioId, Boolean mandante, Pageable pageable) {
+        List<Partida> partidas = partidaRepository.findAll();
+
+        if (clubeId != null) {
+            if (mandante == null) {
+                partidas = partidas.stream()
+                        .filter(p -> p.getClubeCasa().getId().equals(clubeId) || p.getClubeVisitante().getId().equals(clubeId))
+                        .toList();
+            } else if (mandante) {
+                partidas = partidas.stream()
+                        .filter(p -> p.getClubeCasa().getId().equals(clubeId))
+                        .toList();
+            } else {
+                partidas = partidas.stream()
+                        .filter(p -> p.getClubeVisitante().getId().equals(clubeId))
+                        .toList();
+            }
+        }
+
+        if (estadioId != null) {
+            partidas = partidas.stream()
+                    .filter(p -> p.getEstadio().getId().equals(estadioId))
+                    .toList();
+        }
+
+
+        partidas = partidas.stream()
+                .filter(p -> Math.abs(p.getGolsCasa() - p.getGolsVisitante()) >= 3)
+                .toList();
+
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), partidas.size());
+        List<Partida> pagina = start >= partidas.size() ? List.of() : partidas.subList(start, end);
+
+        return new PageImpl<>(pagina, pageable, partidas.size());
+    }
+
+    public Page<Partida> partidasPorClube(Long clubeId, Long estadioId, Boolean goleada, Boolean mandante, Pageable pageable) {
+        List<Partida> partidas = partidaRepository.findAll();
+
+        if (clubeId != null) {
+            if (mandante == null) {
+                partidas = partidas.stream()
+                        .filter(p -> p.getClubeCasa().getId().equals(clubeId)
+                                || p.getClubeVisitante().getId().equals(clubeId))
+                        .toList();
+            } else if (mandante) {
+                partidas = partidas.stream()
+                        .filter(p -> p.getClubeCasa().getId().equals(clubeId))
+                        .toList();
+            } else {
+                partidas = partidas.stream()
+                        .filter(p -> p.getClubeVisitante().getId().equals(clubeId))
+                        .toList();
+            }
+        }
+
+
+        if (estadioId != null) {
+            partidas = partidas.stream()
+                    .filter(p -> p.getEstadio().getId().equals(estadioId))
+                    .toList();
+        }
+
+        if (goleada != null && goleada) {
+            partidas = partidas.stream()
+                    .filter(p -> Math.abs(p.getGolsCasa() - p.getGolsVisitante()) >= 3)
+                    .toList();
+        }
+
+
+    if (pageable.getSort().isSorted()) {
+        for (Sort.Order order : pageable.getSort()) {
+            if (order.getProperty().equalsIgnoreCase("dataHora")) {
+                Comparator<Partida> comparator = Comparator.comparing(Partida::getDataHora);
+                if (order.getDirection().isDescending()) {
+                    comparator = comparator.reversed();
+                }
+                partidas = partidas.stream().sorted(comparator).toList();
+            }
+
+        }
+    }
+
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), partidas.size());
+        List<Partida> pagina = (start >= partidas.size()) ? List.of() : partidas.subList(start, end);
+
+        return new PageImpl<>(pagina, pageable, partidas.size());
     }
 }

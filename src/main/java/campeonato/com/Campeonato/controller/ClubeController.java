@@ -5,6 +5,7 @@ import campeonato.com.Campeonato.exception.ClubeExisteException;
 import campeonato.com.Campeonato.exception.ClubeNaoEncontradoException;
 import campeonato.com.Campeonato.model.Clube;
 import campeonato.com.Campeonato.services.ClubeService;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 
@@ -29,6 +30,7 @@ public class ClubeController {
     @Autowired
     private ClubeService clubeService;
 
+    @Operation(summary = "Cadastra Clube", description = "Cadastro de um novo clube de futebol com validação dos dados!.")
     @PostMapping
     public ResponseEntity<String> cadastrarClube(@RequestBody @Valid ClubeRequestDTO clubeRequestDTO) {
         try {
@@ -39,6 +41,7 @@ public class ClubeController {
         }
     }
 
+    @Operation(summary = "Atualiza Clube", description = "Atualiza um clube de futebol com validação dos dados informados!.")
     @PutMapping("/{id}")
     public ResponseEntity<String> atualizarClube(
             @PathVariable Long id,
@@ -53,6 +56,7 @@ public class ClubeController {
         }
     }
 
+    @Operation(summary = "Inativa Clube", description = "Inativa um clube de futebol!.")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> inativarClube(@PathVariable Long id) {
         try {
@@ -63,6 +67,7 @@ public class ClubeController {
         }
     }
 
+    @Operation(summary = "Busca Clube", description = "Busca Clube pelo ID informado.")
     @GetMapping("/{id}")
     public ResponseEntity<?> buscarClubePorId(@PathVariable Long id) {
         try {
@@ -73,6 +78,7 @@ public class ClubeController {
         }
     }
 
+    @Operation(summary = "Lista Clubes", description = "Lista os Clubes e lista o clube com os parametros informados.")
     @GetMapping
     public Page<Clube> listarClubes(
             @RequestParam(required = false) String nome,

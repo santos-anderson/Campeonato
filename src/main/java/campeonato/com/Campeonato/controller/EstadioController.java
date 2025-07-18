@@ -1,5 +1,6 @@
 package campeonato.com.Campeonato.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -23,6 +24,7 @@ public class EstadioController {
     @Autowired
     private EstadioService estadioService;
 
+    @Operation(summary = "Cadastra Estadio", description = "Cadastra um novo Estadio de futebol com validação dos dados informados.")
     @PostMapping
     public ResponseEntity<String> cadastrarEstadio(@RequestBody @Valid EstadioRequestDTO estadioRequestDTO) {
         try {
@@ -33,6 +35,7 @@ public class EstadioController {
         }
     }
 
+    @Operation(summary = "Atualiza Estadio", description = "Atualiza um estadio de futebol com validação dos dados informados.")
     @PutMapping("/{id}")
     public ResponseEntity<String> atualizarEstadio(
             @PathVariable Long id,
@@ -47,6 +50,7 @@ public class EstadioController {
         }
     }
 
+    @Operation(summary = "Busca Estadios", description = "Busca um estadio de futebol por ID.")
     @GetMapping("/{id}")
     public ResponseEntity<?> buscarEstadioPorId(@PathVariable Long id) {
         try {
@@ -56,7 +60,7 @@ public class EstadioController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
         }
     }
-
+    @Operation(summary = "Lista Estadios", description = "Lista Estadios, e Lista o Estadio pelo nome informado.")
     @GetMapping
     public Page<Estadio> listarEstadio(
             @RequestParam(required = false) String nome,
