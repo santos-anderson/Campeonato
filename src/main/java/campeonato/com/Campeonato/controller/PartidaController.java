@@ -1,9 +1,6 @@
 package campeonato.com.Campeonato.controller;
 
-import campeonato.com.Campeonato.dto.ClubeRankingDTO;
 import campeonato.com.Campeonato.dto.PartidaRequestDTO;
-import campeonato.com.Campeonato.dto.RetrospectoClubeDTO;
-import campeonato.com.Campeonato.dto.RetrospectoContraDTO;
 import campeonato.com.Campeonato.exception.PartidaCadastroException;
 import campeonato.com.Campeonato.exception.PartidaValidacaoException;
 import campeonato.com.Campeonato.model.Partida;
@@ -17,10 +14,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.domain.Sort;
-
-import java.util.List;
-import java.util.Map;
-
 
 @RestController
 @RequestMapping("/partida")
@@ -55,6 +48,7 @@ public class PartidaController {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
         }
     }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<String> removerPartida(@PathVariable Long id) {
         try {
@@ -85,38 +79,5 @@ public class PartidaController {
             @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable
     ) {
         return partidaService.listarPartidas(clubeId, estadioId, goleada, mandante, pageable);
-    }
-
-    @GetMapping("/retrospecto/{clubeId}")
-    public ResponseEntity<RetrospectoClubeDTO> retrospecto(@PathVariable Long clubeId) {
-        try {
-            RetrospectoClubeDTO retro = partidaService.retrospectoClube(clubeId);
-            return ResponseEntity.ok(retro);
-        } catch (PartidaValidacaoException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
-    }
-
-    @GetMapping("/retrospecto-contra/{clubeId}")
-    public ResponseEntity<List<RetrospectoContraDTO>> retrospectoContra(@PathVariable Long clubeId) {
-        try {
-            List<RetrospectoContraDTO> lista = partidaService.retrospectoContraAdversarios(clubeId);
-            return ResponseEntity.ok(lista);
-        } catch (PartidaValidacaoException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
-    }
-
-    @GetMapping("/confrontos")
-    public ResponseEntity<Map<String, Object>> confrontos(
-            @RequestParam Long clubeA, @RequestParam Long clubeB) {
-        return ResponseEntity.ok(partidaService.confrontosEntreClubes(clubeA, clubeB));
-    }
-
-    @GetMapping("/ranking")
-    public ResponseEntity<List<ClubeRankingDTO>> ranking(
-            @RequestParam(name = "criterio", defaultValue = "pontos") String criterio) {
-        List<ClubeRankingDTO> ranking = partidaService.ranking(criterio);
-        return ResponseEntity.ok(ranking);
     }
 }
