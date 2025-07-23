@@ -32,6 +32,7 @@ public class EstadioServiceTest {
     private Estadio criarSalvarEstadio(String nome) {
         Estadio estadio = new Estadio();
         estadio.setNome(nome);
+        estadio.setCep("12345-123");
 
         return estadioRepository.save(estadio);
     }
@@ -39,6 +40,7 @@ public class EstadioServiceTest {
     private EstadioRequestDTO criarEstadioRequestDTO(String nome) {
         EstadioRequestDTO estadioRequestDTO = new EstadioRequestDTO();
         estadioRequestDTO.setNome(nome);
+        estadioRequestDTO.setCep("13054-411");
 
         return estadioRequestDTO;
     }
@@ -64,7 +66,7 @@ public class EstadioServiceTest {
         EstadioExisteException ex = assertThrows(EstadioExisteException.class, () ->
                 estadioService.cadastrarEstadio(estadioRequestDTO)
         );
-        assertEquals("Já existe um Estadio com esse nome!.", ex.getMessage());
+        assertEquals("Já existe um Estádio com esse nome!.", ex.getMessage());
     }
 
     @Test

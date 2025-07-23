@@ -33,6 +33,7 @@ public class EstadioControllerTest {
     private Estadio criarSalvarEstadio(String nome) {
         Estadio estadio = new Estadio();
         estadio.setNome(nome);
+        estadio.setCep("13054-411");
         return estadioRepository.save(estadio);
     }
 
@@ -40,7 +41,8 @@ public class EstadioControllerTest {
     void cadastrarEstadioComSucesso() throws Exception {
         String json = """
             {
-                "nome": "Morumbi"
+                "nome": "Morumbi",
+                "cep":"13054-411" 
             }
         """;
 
@@ -57,7 +59,8 @@ public class EstadioControllerTest {
 
         String json = """
             {
-                "nome": "Morumbi"
+                "nome": "Morumbi",
+                "cep":"13054-411"
             }
         """;
 
@@ -65,7 +68,7 @@ public class EstadioControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isConflict())
-                .andExpect(content().string(containsString("Já existe um Estadio com esse nome!")));
+                .andExpect(content().string(containsString("Já existe um Estádio com esse nome!.")));
     }
 
     @Test
@@ -88,7 +91,8 @@ public class EstadioControllerTest {
 
         String json = """
             {
-                "nome": "Morumbis"
+                "nome": "Morumbis",
+                "cep":"13054-411"
             }
         """;
 
@@ -106,7 +110,8 @@ public class EstadioControllerTest {
 
         String json = """
             {
-                "nome": "Maracanã"
+                "nome": "Maracanã",
+                "cep":"13054-411"
             }
         """;
 
@@ -121,7 +126,8 @@ public class EstadioControllerTest {
     void atualizarEstadioNaoExiste() throws Exception {
         String json = """
             {
-                "nome": "Moises Lucarelli"
+                "nome": "Moises Lucarelli",
+                "cep":"13054-411"
             }
         """;
 
@@ -154,7 +160,8 @@ public class EstadioControllerTest {
 
         String json = """
             {
-                "nome": "Morumbi"
+                "nome": "Morumbi",
+                "cep":"13054-411"
             }
         """;
 
