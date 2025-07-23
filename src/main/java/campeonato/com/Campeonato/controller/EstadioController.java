@@ -15,6 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/estadio")
@@ -26,7 +31,17 @@ public class EstadioController {
 
     @Operation(summary = "Cadastra Estadio", description = "Cadastra um novo Estadio de futebol com validação dos dados informados.")
     @PostMapping
-    public ResponseEntity<String> cadastrarEstadio(@RequestBody @Valid EstadioRequestDTO estadioRequestDTO) {
+    public ResponseEntity<?> cadastrarEstadio(
+            @RequestBody @Valid EstadioRequestDTO estadioRequestDTO,
+            BindingResult result) {
+        if (result.hasErrors()) {
+            Map<String, String> errors = new HashMap<>();
+            for (FieldError error : result.getFieldErrors()) {
+                errors.put(error.getField(), error.getDefaultMessage());
+            }
+            return ResponseEntity.badRequest().body(errors);
+        }
+
         try {
             String mensagem = estadioService.cadastrarEstadio(estadioRequestDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(mensagem);
