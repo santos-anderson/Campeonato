@@ -1,17 +1,17 @@
 package campeonato.com.Campeonato.services;
 
 import campeonato.com.Campeonato.dto.EstadioRequestDTO;
+import campeonato.com.Campeonato.dto.ViaCepResponseDTO;
+import campeonato.com.Campeonato.entity.Estadio;
 import campeonato.com.Campeonato.exception.EstadioExisteException;
 import campeonato.com.Campeonato.exception.EstadioNaoEncontradoException;
-import campeonato.com.Campeonato.entity.Estadio;
 import campeonato.com.Campeonato.repository.EstadioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 import java.util.List;
-
 
 @Service
 public class EstadioService {
@@ -19,17 +19,28 @@ public class EstadioService {
     @Autowired
     private EstadioRepository estadioRepository;
 
+    @Autowired
+    private ViaCepService viaCepService;
+
     public String cadastrarEstadio(EstadioRequestDTO estadioRequestDTO) {
         boolean jaExiste = estadioRepository
                 .findByNomeIgnoreCase(estadioRequestDTO.getNome())
                 .isPresent();
 
         if (jaExiste) {
-            throw new EstadioExisteException("Já existe um Estadio com esse nome!.");
+            throw new EstadioExisteException("Já existe um Estádio com esse nome!.");
         }
+
+        ViaCepResponseDTO endereco = viaCepService.consultarCep(estadioRequestDTO.getCep());
 
         Estadio estadio = new Estadio();
         estadio.setNome(estadioRequestDTO.getNome().trim());
+        estadio.setCep(estadioRequestDTO.getCep());
+        estadio.setLogradouro(endereco.getLogradouro());
+        estadio.setBairro(endereco.getBairro());
+        estadio.setLocalidade(endereco.getLocalidade());
+        estadio.setUf(endereco.getUf());
+
         estadioRepository.save(estadio);
 
         return "Estádio " + estadio.getNome() + " cadastrado com sucesso!";
@@ -42,10 +53,19 @@ public class EstadioService {
         estadioRepository.findByNomeIgnoreCase(dto.getNome())
                 .filter(outroEstadio -> !outroEstadio.getId().equals(id))
                 .ifPresent(outroEstadio -> {
-                   throw new EstadioExisteException("Já existe um estádio com esse nome!");
-              });
+                    throw new EstadioExisteException("Já existe um estádio com esse nome!");
+                });
+
 
         estadio.setNome(dto.getNome());
+        estadio.setCep(dto.getCep());
+
+
+        ViaCepResponseDTO endereco = viaCepService.consultarCep(dto.getCep());
+        estadio.setLogradouro(endereco.getLogradouro());
+        estadio.setBairro(endereco.getBairro());
+        estadio.setLocalidade(endereco.getLocalidade());
+        estadio.setUf(endereco.getUf());
 
         estadioRepository.save(estadio);
         return "Estádio atualizado com sucesso!";
@@ -55,7 +75,6 @@ public class EstadioService {
         return estadioRepository.findById(id).orElseThrow(() ->
                 new EstadioNaoEncontradoException("Estádio não encontrado!"));
     }
-
 
     public Page<Estadio> listarEstadio(String nome, Pageable pageable) {
         List<Estadio> estadios = estadioRepository.findAll();
