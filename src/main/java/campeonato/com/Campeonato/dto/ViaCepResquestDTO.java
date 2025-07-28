@@ -3,7 +3,7 @@ package campeonato.com.Campeonato.dto;
 import lombok.Data;
 
 @Data
-public class ViaCepResponseDTO {
+public class ViaCepResquestDTO {
 
     private String cep;
     private String logradouro;

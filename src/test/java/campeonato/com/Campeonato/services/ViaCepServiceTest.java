@@ -1,6 +1,6 @@
 package campeonato.com.Campeonato.services;
 
-import campeonato.com.Campeonato.dto.ViaCepResponseDTO;
+import campeonato.com.Campeonato.dto.ViaCepResquestDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.client.RestTemplate;
@@ -32,7 +32,7 @@ class ViaCepServiceTest {
 
     @Test
     void deveLancarExcecaoQuandoResponseNull() {
-        when(restTemplate.getForObject(anyString(), eq(ViaCepResponseDTO.class)))
+        when(restTemplate.getForObject(anyString(), eq(ViaCepResquestDTO.class)))
                 .thenReturn(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class,
@@ -42,10 +42,10 @@ class ViaCepServiceTest {
 
     @Test
     void deveLancarExcecaoQuandoErroTrue() {
-        ViaCepResponseDTO response = new ViaCepResponseDTO();
+        ViaCepResquestDTO response = new ViaCepResquestDTO();
         response.setErro(true);
 
-        when(restTemplate.getForObject(anyString(), eq(ViaCepResponseDTO.class)))
+        when(restTemplate.getForObject(anyString(), eq(ViaCepResquestDTO.class)))
                 .thenReturn(response);
 
         RuntimeException ex = assertThrows(RuntimeException.class,
@@ -55,15 +55,15 @@ class ViaCepServiceTest {
 
     @Test
     void deveRetornarResponseValido() {
-        ViaCepResponseDTO response = new ViaCepResponseDTO();
+        ViaCepResquestDTO response = new ViaCepResquestDTO();
         response.setLogradouro("Teste");
         response.setBairro("Bairro");
         response.setErro(false);
 
-        when(restTemplate.getForObject(anyString(), eq(ViaCepResponseDTO.class)))
+        when(restTemplate.getForObject(anyString(), eq(ViaCepResquestDTO.class)))
                 .thenReturn(response);
 
-        ViaCepResponseDTO res = viaCepService.consultarCep("12345-678");
+        ViaCepResquestDTO res = viaCepService.consultarCep("12345-678");
         assertEquals("Teste", res.getLogradouro());
         assertFalse(Boolean.TRUE.equals(res.getErro()));
     }

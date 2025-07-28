@@ -1,7 +1,7 @@
 package campeonato.com.Campeonato.services;
 
 import campeonato.com.Campeonato.dto.EstadioRequestDTO;
-import campeonato.com.Campeonato.dto.ViaCepResponseDTO;
+import campeonato.com.Campeonato.dto.ViaCepResquestDTO;
 import campeonato.com.Campeonato.entity.Estadio;
 import campeonato.com.Campeonato.exception.EstadioExisteException;
 import campeonato.com.Campeonato.exception.EstadioNaoEncontradoException;
@@ -31,7 +31,7 @@ public class EstadioService {
             throw new EstadioExisteException("Já existe um Estádio com esse nome!.");
         }
 
-        ViaCepResponseDTO endereco = viaCepService.consultarCep(estadioRequestDTO.getCep());
+        ViaCepResquestDTO endereco = viaCepService.consultarCep(estadioRequestDTO.getCep());
 
         Estadio estadio = new Estadio();
         estadio.setNome(estadioRequestDTO.getNome().trim());
@@ -61,7 +61,7 @@ public class EstadioService {
         estadio.setCep(dto.getCep());
 
 
-        ViaCepResponseDTO endereco = viaCepService.consultarCep(dto.getCep());
+        ViaCepResquestDTO endereco = viaCepService.consultarCep(dto.getCep());
         estadio.setLogradouro(endereco.getLogradouro());
         estadio.setBairro(endereco.getBairro());
         estadio.setLocalidade(endereco.getLocalidade());
