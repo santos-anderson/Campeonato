@@ -1,13 +1,14 @@
-
 package campeonato.com.Campeonato.dto;
 
 import jakarta.validation.constraints.*;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
+
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Data
-public class PartidaRequestDTO {
+public class PartidaRequestDTO  implements Serializable {
     @NotNull(message = "Id do clube da casa é obrigatório")
     private Long clubeCasaId;
 
