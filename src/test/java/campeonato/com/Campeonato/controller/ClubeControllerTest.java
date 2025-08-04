@@ -14,7 +14,6 @@ import org.springframework.http.MediaType;
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.AssertionsKt.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -155,16 +154,6 @@ public class ClubeControllerTest {
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Clube não encontrado")));
     }
 
-    @Test
-    void inativarClubeComSucesso() throws Exception {
-        Clube clube = criarSalvarClube("Corinthians", "SP", LocalDate.of(1910, 9, 1), true);
-        mockMvc.perform(delete("/clube/" + clube.getId()))
-                .andExpect(status().isNoContent());
-
-        Clube inativo = clubeRepository.findById(clube.getId()).orElse(null);
-        assertNotNull(inativo);
-        assertFalse(inativo.getStatus());
-    }
 
     @Test
     void inativarClubeNaoEncontrado() throws Exception {

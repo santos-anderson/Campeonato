@@ -1,8 +1,6 @@
 package campeonato.com.Campeonato.controller;
 
 import campeonato.com.Campeonato.dto.ClubeRequestDTO;
-import campeonato.com.Campeonato.exception.ClubeExisteException;
-import campeonato.com.Campeonato.exception.ClubeNaoEncontradoException;
 import campeonato.com.Campeonato.entity.Clube;
 import campeonato.com.Campeonato.services.ClubeService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,8 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
 
-
-
 @RestController
 @RequestMapping("/clube")
 public class ClubeController {
@@ -33,49 +29,29 @@ public class ClubeController {
     @Operation(summary = "Cadastra Clube", description = "Cadastro de um novo clube de futebol com validação dos dados!.")
     @PostMapping
     public ResponseEntity<String> cadastrarClube(@RequestBody @Valid ClubeRequestDTO clubeRequestDTO) {
-        try {
-            String mensagem = clubeService.cadastrarClube(clubeRequestDTO);
-            return ResponseEntity.status(HttpStatus.CREATED).body(mensagem);
-        } catch (ClubeExisteException ex) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
-        }
+        String mensagem = clubeService.cadastrarClube(clubeRequestDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(mensagem);
     }
 
     @Operation(summary = "Atualiza Clube", description = "Atualiza um clube de futebol com validação dos dados informados!.")
     @PutMapping("/{id}")
-    public ResponseEntity<String> atualizarClube(
-            @PathVariable Long id,
-            @RequestBody @Valid ClubeRequestDTO clubeRequestDTO) {
-        try {
-            String mensagem = clubeService.atualizarClube(id, clubeRequestDTO);
-            return ResponseEntity.ok(mensagem);
-        } catch (ClubeExisteException ex) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
-        } catch (ClubeNaoEncontradoException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
-        }
+    public ResponseEntity<String> atualizarClube(@PathVariable Long id, @RequestBody @Valid ClubeRequestDTO clubeRequestDTO) {
+        String mensagem = clubeService.atualizarClube(id, clubeRequestDTO);
+        return ResponseEntity.ok(mensagem);
     }
+
 
     @Operation(summary = "Inativa Clube", description = "Inativa um clube de futebol!.")
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> inativarClube(@PathVariable Long id) {
-        try {
-            clubeService.inativarClube(id);
-            return ResponseEntity.noContent().build();
-        } catch (ClubeNaoEncontradoException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
-        }
+    public ResponseEntity<Void> inativarClube(@PathVariable Long id) {
+        clubeService.inativarClube(id);
+        return ResponseEntity.noContent().build();
     }
-
     @Operation(summary = "Busca Clube", description = "Busca Clube pelo ID informado.")
     @GetMapping("/{id}")
-    public ResponseEntity<?> buscarClubePorId(@PathVariable Long id) {
-        try {
-            Clube clube = clubeService.buscarClubePorId(id);
-            return ResponseEntity.ok(clube);
-        } catch (ClubeNaoEncontradoException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
-        }
+    public ResponseEntity<Clube> buscarClubePorId(@PathVariable Long id) {
+        Clube clube = clubeService.buscarClubePorId(id);
+        return ResponseEntity.ok(clube);
     }
 
     @Operation(summary = "Lista Clubes", description = "Lista os Clubes e lista o clube com os parametros informados.")
@@ -88,8 +64,4 @@ public class ClubeController {
     ) {
         return clubeService.listarClubes(nome, uf, status, pageable);
     }
-
 }
-
-
-

@@ -6,8 +6,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.domain.Sort;
 import campeonato.com.Campeonato.dto.EstadioRequestDTO;
-import campeonato.com.Campeonato.exception.EstadioExisteException;
-import campeonato.com.Campeonato.exception.EstadioNaoEncontradoException;
 import campeonato.com.Campeonato.entity.Estadio;
 import campeonato.com.Campeonato.services.EstadioService;
 import jakarta.validation.Valid;
@@ -15,11 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/estadio")
@@ -31,50 +25,25 @@ public class EstadioController {
 
     @Operation(summary = "Cadastra Estadio", description = "Cadastra um novo Estadio de futebol com validação dos dados informados.")
     @PostMapping
-    public ResponseEntity<?> cadastrarEstadio(
-            @RequestBody @Valid EstadioRequestDTO estadioRequestDTO,
-            BindingResult result) {
-        if (result.hasErrors()) {
-            Map<String, String> errors = new HashMap<>();
-            for (FieldError error : result.getFieldErrors()) {
-                errors.put(error.getField(), error.getDefaultMessage());
-            }
-            return ResponseEntity.badRequest().body(errors);
-        }
-
-        try {
-            String mensagem = estadioService.cadastrarEstadio(estadioRequestDTO);
-            return ResponseEntity.status(HttpStatus.CREATED).body(mensagem);
-        } catch (EstadioExisteException ex) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
-        }
+    public ResponseEntity<String> cadastrarEstadio(@RequestBody @Valid EstadioRequestDTO estadioRequestDTO) {
+        String mensagem = estadioService.cadastrarEstadio(estadioRequestDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(mensagem);
     }
 
     @Operation(summary = "Atualiza Estadio", description = "Atualiza um estadio de futebol com validação dos dados informados.")
     @PutMapping("/{id}")
-    public ResponseEntity<String> atualizarEstadio(
-            @PathVariable Long id,
-            @RequestBody @Valid EstadioRequestDTO estadioRequestDTO) {
-        try {
-            String mensagem = estadioService.atualizaEstadio(id, estadioRequestDTO);
-            return ResponseEntity.ok(mensagem);
-        } catch (EstadioExisteException ex) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
-        } catch (EstadioNaoEncontradoException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
-        }
+    public ResponseEntity<String> atualizarEstadio(@PathVariable Long id, @RequestBody @Valid EstadioRequestDTO estadioRequestDTO) {
+        String mensagem = estadioService.atualizaEstadio(id, estadioRequestDTO);
+        return ResponseEntity.ok(mensagem);
     }
 
     @Operation(summary = "Busca Estadios", description = "Busca um estadio de futebol por ID.")
     @GetMapping("/{id}")
-    public ResponseEntity<?> buscarEstadioPorId(@PathVariable Long id) {
-        try {
-            Estadio estadio = estadioService.buscarEstadioPorId(id);
-            return ResponseEntity.ok(estadio);
-        } catch (EstadioNaoEncontradoException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
-        }
+    public ResponseEntity<Estadio> buscarEstadioPorId(@PathVariable Long id) {
+        Estadio estadio = estadioService.buscarEstadioPorId(id);
+        return ResponseEntity.ok(estadio);
     }
+
     @Operation(summary = "Lista Estadios", description = "Lista Estadios, e Lista o Estadio pelo nome informado.")
     @GetMapping
     public Page<Estadio> listarEstadio(

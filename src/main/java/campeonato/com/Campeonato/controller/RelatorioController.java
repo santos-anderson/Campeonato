@@ -5,11 +5,9 @@ import campeonato.com.Campeonato.dto.RetrospectoClubeDTO;
 import campeonato.com.Campeonato.dto.RetrospectoContraDTO;
 import campeonato.com.Campeonato.entity.Partida;
 import campeonato.com.Campeonato.services.RelatorioService;
-import campeonato.com.Campeonato.exception.PartidaValidacaoException;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
@@ -29,24 +27,16 @@ public class RelatorioController {
     }
     @Operation(summary = "Restropecto de um clube", description = "Retrospecto de um clube pelo ID informado!.")
     @GetMapping("/retrospecto/{clubeId}")
-    public ResponseEntity<?> retrospecto(@PathVariable Long clubeId) {
-        try {
-            RetrospectoClubeDTO retro = relatorioService.retrospectoClube(clubeId);
-            return ResponseEntity.ok(retro);
-        } catch (PartidaValidacaoException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
-        }
+    public ResponseEntity<RetrospectoClubeDTO> retrospecto(@PathVariable Long clubeId) {
+        RetrospectoClubeDTO retro = relatorioService.retrospectoClube(clubeId);
+        return ResponseEntity.ok(retro);
     }
 
     @Operation(summary = "Retrospecto de um clube contra os advesarios", description = "Retrospecto de um clube contra seus adversarios pelo ID.")
     @GetMapping("/retrospecto-contra/{clubeId}")
-    public ResponseEntity<?> retrospectoContra(@PathVariable Long clubeId) {
-        try {
-            List<RetrospectoContraDTO> lista = relatorioService.retrospectoContraAdversarios(clubeId);
-            return ResponseEntity.ok(lista);
-        } catch (PartidaValidacaoException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
-        }
+    public ResponseEntity<List<RetrospectoContraDTO>> retrospectoContra(@PathVariable Long clubeId) {
+        List<RetrospectoContraDTO> lista = relatorioService.retrospectoContraAdversarios(clubeId);
+        return ResponseEntity.ok(lista);
     }
 
     @Operation(summary = "Confrontos entre clubes", description = "Confronto entre os clubes informados!.")
