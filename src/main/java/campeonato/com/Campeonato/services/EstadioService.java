@@ -43,7 +43,14 @@ public class EstadioService {
 
         estadioRepository.save(estadio);
 
-        return "Estádio " + estadio.getNome() + " cadastrado com sucesso!";
+        return "Estadio ID : " + estadio.getId()+
+                "\nEstádio : " + estadio.getNome()+
+                "\nEndereço : " + estadio.getLogradouro()+
+                "\nBairro : " + estadio.getBairro()+
+                "\nLocalidade : "+estadio.getLocalidade()+
+                "\nUF : "+estadio.getUf()+
+                "\nCep : " + estadio.getCep()+
+                "\nCadastrado com sucesso!";
     }
 
     public String atualizaEstadio(Long id, EstadioRequestDTO dto) {
@@ -56,10 +63,8 @@ public class EstadioService {
                     throw new EstadioExisteException("Já existe um estádio com esse nome!");
                 });
 
-
         estadio.setNome(dto.getNome());
         estadio.setCep(dto.getCep());
-
 
         ViaCepResquestDTO endereco = viaCepService.consultarCep(dto.getCep());
         estadio.setLogradouro(endereco.getLogradouro());

@@ -37,7 +37,7 @@ public class PartidaService {
     public String cadastrarPartida(PartidaRequestDTO dto) {
         Partida partida = validarEConstruirPartida(dto, null);
         partidaRepository.save(partida);
-        return "Partida cadastrada!";
+        return "Partida ID = " +partida.getId() +", Partida cadastrada com sucesso!";
     }
     public String cadastrarPartidaFila(PartidaRequestDTO dto) {
         partidaProducer.enviarPartidaParaFila(dto);

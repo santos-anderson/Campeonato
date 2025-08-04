@@ -37,7 +37,7 @@ public class ClubeService {
 
         clubeRepository.save(clube);
 
-        return "Clube " + clube.getNome() + " cadastrado com sucesso!";
+        return " Clube ID : " + clube.getId()+ ", Clube " + clube.getNome()+" cadastrado com sucesso!";
     }
 
     public String atualizarClube(Long id, ClubeRequestDTO dto) {
