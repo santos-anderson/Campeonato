@@ -86,6 +86,17 @@ public class EstadioControllerTest {
     }
 
     @Test
+    void cadastrarEstadioJsonMalFormatado() throws Exception {
+        String jsonInvalido = "{ \"nome\": \"Morumbi\", "; // JSON incompleto
+
+        mockMvc.perform(post("/estadio")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonInvalido))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("JSON mal formatado ou dados inválidos"));
+    }
+
+    @Test
     void atualizarEstadioComSucesso() throws Exception {
         Estadio estadio = criarSalvarEstadio("Morumbi");
 
@@ -173,6 +184,17 @@ public class EstadioControllerTest {
     }
 
     @Test
+    void atualizarEstadioJsonMalFormatado() throws Exception {
+        Estadio estadio = criarSalvarEstadio("Morumbi");
+        String jsonInvalido = "{ \"nome\": \"Morumbi\" ";
+        mockMvc.perform(put("/estadio/" + estadio.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonInvalido))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("JSON mal formatado ou dados inválidos"));
+    }
+
+    @Test
     void buscarEstadioPorIdComSucesso() throws Exception {
         Estadio estadio = criarSalvarEstadio("Morumbi");
 
@@ -237,4 +259,13 @@ public class EstadioControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()").value(1));
     }
+
+    @Test
+    void listarEstadioComAcceptInvalido() throws Exception {
+        mockMvc.perform(get("/estadio")
+                        .accept(MediaType.APPLICATION_XML))
+                .andExpect(status().isNotAcceptable())
+                .andExpect(content().string("Formato de resposta não suportado."));
+    }
+
 }

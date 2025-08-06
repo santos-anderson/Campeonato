@@ -13,7 +13,6 @@ import org.springframework.http.MediaType;
 
 import java.time.LocalDate;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -57,12 +56,12 @@ public class ClubeControllerTest {
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Corinthians")));
     }
 
-        @Test
-        void cadastrarClubeDuplicado() throws Exception {
+    @Test
+    void cadastrarClubeDuplicado() throws Exception {
 
-            criarSalvarClube("Corinthians", "SP", LocalDate.of(1910, 9, 1), true);
+        criarSalvarClube("Corinthians", "SP", LocalDate.of(1910, 9, 1), true);
 
-            String json = """
+        String json = """
             {
                 "nome": "Corinthians",
                 "uf": "SP",
@@ -71,12 +70,12 @@ public class ClubeControllerTest {
             }
         """;
 
-            mockMvc.perform(post("/clube")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(json))
-                    .andExpect(status().isConflict())
-                    .andExpect(content().string(org.hamcrest.Matchers.containsString("Já existe um clube com esse nome nesse estado.")));
-        }
+        mockMvc.perform(post("/clube")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isConflict())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Já existe um clube com esse nome nesse estado.")));
+    }
 
     @Test
     void cadastrarClubeComCampoInvalido() throws Exception {
@@ -94,6 +93,41 @@ public class ClubeControllerTest {
                         .content(json))
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    void cadastrarClubeComDataFutura() throws Exception {
+        String json = """
+        {
+            "nome": "Bahia",
+            "uf": "BA",
+            "dataCriacao": "2999-01-01",
+            "status": true
+        }
+    """;
+
+        mockMvc.perform(post("/clube")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void cadastrarClubeComJsonInvalido() throws Exception {
+        String json = """
+        {
+            "nome": "Bahia",
+            "uf": "BA",
+            "dataCriacao": "1912-01-01"
+            "status": true
+    """;
+
+        mockMvc.perform(post("/clube")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isBadRequest());
+    }
+
+
 
     @Test
     void atualizarClubeComSucesso() throws Exception {
@@ -154,6 +188,33 @@ public class ClubeControllerTest {
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Clube não encontrado")));
     }
 
+    @Test
+    void atualizarClubeComUfInvalida() throws Exception {
+        Clube clube = criarSalvarClube("São Paulo", "SP", LocalDate.of(1930, 1, 25), true);
+
+        String json = """
+        {
+            "nome": "São Paulo",
+            "uf": "XX",
+            "dataCriacao": "1930-01-25",
+            "status": true
+        }
+    """;
+
+        mockMvc.perform(put("/clube/" + clube.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isBadRequest());
+    }
+
+
+    @Test
+    void inativarClubeComSucesso() throws Exception {
+        Clube clube = criarSalvarClube("Santos", "SP", LocalDate.of(1912, 4, 14), true);
+
+        mockMvc.perform(delete("/clube/" + clube.getId()))
+                .andExpect(status().isNoContent());
+    }
 
     @Test
     void inativarClubeNaoEncontrado() throws Exception {
@@ -180,6 +241,16 @@ public class ClubeControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Clube não encontrado")));
     }
+
+    @Test
+    void buscarClubeComAcceptInvalido() throws Exception {
+        Clube clube = criarSalvarClube("Cruzeiro", "MG", LocalDate.of(1921, 1, 2), true);
+
+        mockMvc.perform(get("/clube/" + clube.getId())
+                        .accept(MediaType.APPLICATION_XML))
+                .andExpect(status().isNotAcceptable());
+    }
+
 
     @Test
     void listarClubesSemFiltro() throws Exception {
