@@ -398,5 +398,135 @@ public class RelatorioControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()").value(0));
     }
+
+    @Test
+    void rankingParametroDefault() throws Exception {
+        Clube c = criarSalvarClube("Corinthians", "SP", LocalDate.of(1910, 9, 1), true);
+        Clube c2 = criarSalvarClube("Palmeiras", "SP", LocalDate.of(1914, 8, 26), true);
+        Estadio e = criarSalvarEstadio("Morumbi");
+
+        criarSalvarPartida(c, c2, e, LocalDateTime.now(), 2, 0); // Corinthians ganha
+
+        mockMvc.perform(get("/relatorios/ranking"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].nome").value("Corinthians"))
+                .andExpect(jsonPath("$[0].pontos").value(3));
+    }
+
+    @Test
+    void rankingSemNenhumJogo() throws Exception {
+
+        criarSalvarClube("Corinthians", "SP", LocalDate.of(1910, 9, 1), true);
+        mockMvc.perform(get("/relatorios/ranking"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
+    }
+
+    @Test
+    void goleadasComPaginacao() throws Exception {
+        Clube c1 = criarSalvarClube("Time1", "SP", LocalDate.of(1900, 1, 1), true);
+        Clube c2 = criarSalvarClube("Time2", "SP", LocalDate.of(1900, 1, 1), true);
+        Estadio est = criarSalvarEstadio("Estadio Teste");
+        for (int i = 0; i < 3; i++) criarSalvarPartida(c1, c2, est, LocalDateTime.now().plusDays(i), 4, 0);
+        mockMvc.perform(get("/relatorios/goleadas").param("size", "2").param("page", "0"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(2));
+        mockMvc.perform(get("/relatorios/goleadas").param("size", "2").param("page", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(1));
+    }
+
+    @Test
+    void partidasClubeComPaginacao() throws Exception {
+        Clube c1 = criarSalvarClube("Corinthians", "SP", LocalDate.of(1910, 9, 1), true);
+        Clube c2 = criarSalvarClube("Palmeiras", "SP", LocalDate.of(1914, 8, 26), true);
+        Estadio est = criarSalvarEstadio("Morumbi");
+        for (int i = 0; i < 3; i++) criarSalvarPartida(c1, c2, est, LocalDateTime.now().plusDays(i), 2, 0);
+        mockMvc.perform(get("/relatorios/partidas-clube")
+                        .param("clubeId", c1.getId().toString())
+                        .param("size", "2").param("page", "0"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(2));
+        mockMvc.perform(get("/relatorios/partidas-clube")
+                        .param("clubeId", c1.getId().toString())
+                        .param("size", "2").param("page", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(1));
+    }
+
+    @Test
+    void confrontosSemClubeA() throws Exception {
+        Clube c2 = criarSalvarClube("Palmeiras", "SP", LocalDate.of(1914, 8, 26), true);
+        mockMvc.perform(get("/relatorios/confrontos")
+                        .param("clubeB", c2.getId().toString()))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void confrontosSemClubeB() throws Exception {
+        Clube c1 = criarSalvarClube("Corinthians", "SP", LocalDate.of(1910, 9, 1), true);
+        mockMvc.perform(get("/relatorios/confrontos")
+                        .param("clubeA", c1.getId().toString()))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void confrontosSemNenhumParametro() throws Exception {
+        mockMvc.perform(get("/relatorios/confrontos"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void retrospectoIdInvalido() throws Exception {
+        mockMvc.perform(get("/relatorios/retrospecto/abc"))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    void retrospectoContraIdInvalido() throws Exception {
+        mockMvc.perform(get("/relatorios/retrospecto-contra/abc"))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    void partidasClubeIdInvalido() throws Exception {
+        mockMvc.perform(get("/relatorios/partidas-clube").param("clubeId", "abc"))
+                .andExpect(status().isInternalServerError());
+    }
+
+
+    @Test
+    void goleadasTodosFiltros() throws Exception {
+        Clube c1 = criarSalvarClube("Corinthians", "SP", LocalDate.of(1910, 9, 1), true);
+        Clube c2 = criarSalvarClube("Palmeiras", "SP", LocalDate.of(1914, 8, 26), true);
+        Estadio est = criarSalvarEstadio("Morumbi");
+        criarSalvarPartida(c1, c2, est, LocalDateTime.now(), 4, 0);
+        mockMvc.perform(get("/relatorios/goleadas")
+                        .param("clubeId", c1.getId().toString())
+                        .param("estadioId", est.getId().toString())
+                        .param("mandante", "true")
+                        .param("size", "1")
+                        .param("page", "0"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(1));
+    }
+    @Test
+    void partidasClubeTodosFiltros() throws Exception {
+        Clube c1 = criarSalvarClube("Corinthians", "SP", LocalDate.of(1910, 9, 1), true);
+        Clube c2 = criarSalvarClube("Palmeiras", "SP", LocalDate.of(1914, 8, 26), true);
+        Estadio est = criarSalvarEstadio("Morumbi");
+        criarSalvarPartida(c1, c2, est, LocalDateTime.now(), 5, 2);
+        mockMvc.perform(get("/relatorios/partidas-clube")
+                        .param("clubeId", c1.getId().toString())
+                        .param("estadioId", est.getId().toString())
+                        .param("goleada", "true")
+                        .param("mandante", "true")
+                        .param("size", "1")
+                        .param("page", "0"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(1));
+    }
+
+
 }
 

@@ -109,5 +109,3 @@ public class RelatorioController {
         return relatorioService.partidasPorClube(clubeId, estadioId, goleada, mandante, pageable);
     }
 }
-
-

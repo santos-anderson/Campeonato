@@ -228,16 +228,16 @@ public class PartidaServiceTest {
         Clube visitante = criarSalvarClube("Palmeiras", "SP", LocalDate.of(1914, 8, 26), true);
         Estadio estadio = criarSalvarEstadio("Morumbi");
 
-        criarSalvarPartida(casa, visitante, estadio, LocalDateTime.of(2025, 7, 23, 21, 0), 1, 1);
+        criarSalvarPartida(casa, visitante, estadio, LocalDateTime.of(2030, 7, 23, 21, 0), 1, 1);
 
         PartidaRequestDTO partidaRequestDTO = criarPartidaDTO(
                 casa.getId(), visitante.getId(), estadio.getId(),
-                LocalDateTime.of(2025, 7, 24, 20, 0), 1, 1);
+                LocalDateTime.of(2030, 7, 24, 20, 0), 1, 1);
 
         Exception ex = assertThrows(PartidaCadastroException.class, () ->
                 partidaService.cadastrarPartida(partidaRequestDTO)
         );
-        assertEquals("Um dos clubes já tem partida marcada em menos de 48h.", ex.getMessage());
+        assertEquals("Um dos clubes já tem partida marcada em menos de 48h!", ex.getMessage());
     }
 
     @Test
@@ -441,18 +441,18 @@ public class PartidaServiceTest {
 
         Partida partida = criarSalvarPartida(
                 corinthians, palmeiras, morumbi,
-                LocalDateTime.of(2025, 8, 20, 16, 0), 1, 1
+                LocalDateTime.of(2030, 8, 20, 16, 0), 1, 1
         );
 
         criarSalvarPartida(
                 corinthians, palmeiras, morumbi,
-                LocalDateTime.of(2025, 8, 19, 16, 0), 1, 1
+                LocalDateTime.of(2030, 8, 19, 16, 0), 1, 1
         );
 
 
         PartidaRequestDTO partidaRequestDTO = criarPartidaDTO(
                 corinthians.getId(), palmeiras.getId(), morumbi.getId(),
-                LocalDateTime.of(2025, 8, 21, 10, 0), 2, 2
+                LocalDateTime.of(2030, 8, 21, 10, 0), 2, 2
         );
 
         Exception ex = assertThrows(PartidaCadastroException.class, () ->

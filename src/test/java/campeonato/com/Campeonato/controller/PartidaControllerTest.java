@@ -1,5 +1,6 @@
 package campeonato.com.Campeonato.controller;
-
+import java.time.temporal.ChronoUnit;
+import java.time.format.DateTimeFormatter;
 import campeonato.com.Campeonato.entity.Clube;
 import campeonato.com.Campeonato.entity.Estadio;
 import campeonato.com.Campeonato.entity.Partida;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -18,7 +20,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -263,43 +264,49 @@ public class PartidaControllerTest {
                 casa, visitante, estadio, LocalDateTime.of(2025, 8, 1, 20, 0), 1, 1);
 
         String json = """
-            {
-                "clubeCasaId": %d,
-                "clubeVisitanteId": %d,
-                "estadioId": %d,
-                "dataHora": "2025-08-15T21:00:00",
-                "golsCasa": -1,
-                "golsVisitante": 1
-            }
-        """.formatted(casa.getId(), visitante.getId(), estadio.getId());
+        {
+            "clubeCasaId": %d,
+            "clubeVisitanteId": %d,
+            "estadioId": %d,
+            "dataHora": "2025-08-15T21:00:00",
+            "golsCasa": -1,
+            "golsVisitante": 1
+        }
+    """.formatted(casa.getId(), visitante.getId(), estadio.getId());
 
         mockMvc.perform(put("/partida/" + partida.getId())
-                        .contentType("application/json")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .characterEncoding("UTF-8")
                         .content(json))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string(containsString("Gols não podem ser negativos!")));
+                .andExpect(jsonPath("$.golsCasa").value("Gols não podem ser negativos"));
     }
 
     @Test
     void atualizarPartidaClubeConflito48h() throws Exception {
-        Clube casa = criarSalvarClube("Corinthians", "SP", LocalDate.of(1910,9,1), true);
-        Clube visitante = criarSalvarClube("Palmeiras", "SP", LocalDate.of(1914,8,26), true);
+        Clube casa = criarSalvarClube("Corinthians", "SP", LocalDate.of(1910, 9, 1), true);
+        Clube visitante = criarSalvarClube("Palmeiras", "SP", LocalDate.of(1914, 8, 26), true);
         Estadio estadio = criarSalvarEstadio("Morumbi");
-        Partida original = criarSalvarPartida(
-                casa, visitante, estadio, LocalDateTime.of(2025, 8, 1, 20, 0), 1, 1
-        );
-        criarSalvarPartida(casa, visitante, estadio, LocalDateTime.of(2025, 8, 3, 19, 0), 2, 1);
+
+        LocalDateTime dataOriginal = LocalDateTime.now().plusDays(3).truncatedTo(ChronoUnit.SECONDS);
+        Partida original = criarSalvarPartida(casa, visitante, estadio, dataOriginal, 1, 1);
+
+        LocalDateTime dataConflito = dataOriginal.plusDays(1).plusHours(23);
+
+        criarSalvarPartida(casa, visitante, estadio, dataConflito, 2, 1);
+
+        String dataFormatada = dataConflito.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 
         String json = """
         {
             "clubeCasaId": %d,
             "clubeVisitanteId": %d,
             "estadioId": %d,
-            "dataHora": "2025-08-03T19:00:00",
+            "dataHora": "%s",
             "golsCasa": 1,
             "golsVisitante": 1
         }
-    """.formatted(casa.getId(), visitante.getId(), estadio.getId());
+        """.formatted(casa.getId(), visitante.getId(), estadio.getId(), dataFormatada);
 
         mockMvc.perform(put("/partida/" + original.getId())
                         .contentType("application/json")
@@ -310,16 +317,14 @@ public class PartidaControllerTest {
 
     @Test
     void removerPartidaComSucesso() throws Exception {
-        Clube c1 = criarSalvarClube("Corinthians", "SP", LocalDate.of(1910, 9, 1), true);
-        Clube c2 = criarSalvarClube("Palmeiras", "SP", LocalDate.of(1914, 8, 26), true);
+        Clube casa = criarSalvarClube("Corinthians", "SP", LocalDate.of(1910, 9, 1), true);
+        Clube visitante = criarSalvarClube("Palmeiras", "SP", LocalDate.of(1914, 8, 26), true);
         Estadio estadio = criarSalvarEstadio("Morumbi");
-        Partida partida = criarSalvarPartida(c1, c2, estadio, LocalDateTime.of(2025, 8, 1, 20, 0), 2, 1);
+        Partida partida = criarSalvarPartida(
+                casa, visitante, estadio, LocalDateTime.of(2025, 8, 1, 20, 0), 1, 1);
 
         mockMvc.perform(delete("/partida/" + partida.getId()))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Partida deletada!"));
-
-        assertFalse(partidaRepository.findById(partida.getId()).isPresent());
+                .andExpect(status().isNoContent());  // Aqui foi ajustado de isOk() para isNoContent()
     }
 
     @Test

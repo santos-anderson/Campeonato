@@ -153,7 +153,7 @@ public class PartidaService {
                 || partidaRepository.existsByClubeVisitanteIdAndDataHoraBetweenAndIdNot(visitante.getId(), inicio, fim, partidaIdParaIgnorar);
 
         if (conflitoComPartidas)
-            throw new PartidaCadastroException("Um dos clubes já tem partida marcada em menos de 48h.");
+            throw new PartidaCadastroException("Um dos clubes já tem partida marcada em menos de 48h!");
 
         LocalDateTime diaIni = dto.getDataHora().toLocalDate().atStartOfDay();
         LocalDateTime diaFim = dto.getDataHora().toLocalDate().atTime(23, 59, 59);

@@ -1,5 +1,6 @@
 package campeonato.com.Campeonato.exception;
 
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,6 +18,15 @@ import java.util.Map;
 @Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(PartidaValidacaoException.class)
+    public ResponseEntity<String> handlePartidaNaoEncontrada(PartidaValidacaoException ex) {
+        // Corrija para considerar ambos os gêneros:
+        if (ex.getMessage().contains("não encontrada") || ex.getMessage().contains("não encontrado")) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
@@ -51,17 +62,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 
-    @ExceptionHandler(PartidaValidacaoException.class)
-    public ResponseEntity<Object> handlePartidaValidacao(PartidaValidacaoException ex) {
-        return ResponseEntity.badRequest().body(ex.getMessage());
-    }
-
     @ExceptionHandler(PartidaCadastroException.class)
     public ResponseEntity<Object> handlePartidaCadastro(PartidaCadastroException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
 
-    // ✅ Adicionado para evitar que o erro 406 vire erro 500
     @ExceptionHandler(HttpMediaTypeNotAcceptableException.class)
     public ResponseEntity<Object> handleMediaTypeNotAcceptable(HttpMediaTypeNotAcceptableException ex) {
         return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE)
@@ -74,5 +79,18 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Ocorreu um erro interno no servidor. Por favor, tente novamente mais tarde.");
     }
-}
 
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<Object> handleMissingServletRequestParameter(MissingServletRequestParameterException ex) {
+        String msg = "Parâmetro obrigatório '" + ex.getParameterName() + "' não informado.";
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
+
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<Object> handleResponseStatusException(ResponseStatusException ex) {
+
+        return ResponseEntity.status(ex.getStatusCode()).body(ex.getReason());
+    }
+
+}
