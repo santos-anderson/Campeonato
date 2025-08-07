@@ -660,4 +660,24 @@ public class PartidaServiceTest {
         assertEquals(3, page1.getTotalElements());
     }
 
+    @Test
+    void listarPartidasPorClubeMandante() {
+        Clube casa = criarSalvarClube("Corinthians", "SP", LocalDate.of(1910, 9, 1), true);
+        Clube visitante = criarSalvarClube("Palmeiras", "SP", LocalDate.of(1914, 8, 26), true);
+        Estadio estadio = criarSalvarEstadio("Morumbi");
+
+        criarSalvarPartida(casa, visitante, estadio, LocalDateTime.of(2025, 8, 1, 16, 0), 2, 1);
+        criarSalvarPartida(visitante, casa, estadio, LocalDateTime.of(2025, 8, 5, 20, 0), 1, 1);
+
+        Page<Partida> page = partidaService.listarPartidas(
+                casa.getId(),
+                null,
+                null,
+                true,
+                PageRequest.of(0, 10)
+        );
+
+        assertEquals(1, page.getTotalElements());
+    }
+
 }
